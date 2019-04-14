@@ -19,8 +19,8 @@ function createBaseResolver<T extends ClassType, X extends ClassType>(
 ) {
   @Resolver({ isAbstract: true })
   abstract class BaseResolver {
-    // @Query(type => [objectTypeCls], { name: `getAll${suffix}` })
-    // async getAll(@Arg("first", type => Int) first: number): Promise<T[]> {
+    // @Query(() => [objectTypeCls], { name: `getAll${suffix}` })
+    // async getAll(@Arg("first", () => Int) first: number): Promise<T[]> {
     //   return this.items.slice(0, first);
     // }
 
@@ -54,7 +54,7 @@ const BaseCreateProductResolver = createBaseResolver(
   Product
 );
 
-@Resolver()
+@Resolver(() => User)
 export class CreateUserResolver extends BaseCreateUserResolver {
   //   @Mutation(() => User)
   //   async createUser(@Arg("data") data: RegisterInput) {

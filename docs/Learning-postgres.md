@@ -2,6 +2,11 @@
 
 http://www.postgresqltutorial.com/
 
+createdb atlas_travel
+createdb atlas_travel-TESTING
+
+CREATE USER appUser WITH PASSWORD 'JVkPNUjNPnCpKHTHA4ybmrYM';
+
 ## psql commands
 
 \du show all users
@@ -17,6 +22,7 @@ http://www.postgresqltutorial.com/
 LOGIN COMMANDS
 
 psql -d mydb -U myuser
+psql -d atlas_travel -U eddienaff
 psql -h myhost -d mydb -U myuser
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
