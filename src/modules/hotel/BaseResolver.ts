@@ -1,9 +1,18 @@
-import { Arg, ClassType, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  ClassType,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware
+} from "type-graphql";
 import { GraphQLInt as Int } from "graphql";
 // import casual from "casual";
 
 import { Photo } from "../../entity/Photo";
 import { Hotel } from "../../entity/Hotel";
+import { logger } from "../middleware/logger";
+import { isAuth } from "../middleware/isAuth";
 
 // const hotels: any = [
 //   {
@@ -47,6 +56,7 @@ export function createBaseResolver<T extends ClassType, X extends ClassType>(
     // constructor(
     //   private photoRepository: Repository<Photo> // dependency injection
     // ) {}
+    @UseMiddleware(isAuth, logger)
     @Query(() => [objectTypeCls], { name: `getAll${suffix}` })
     async getAll(@Arg("first", () => Int) first: number) {
       console.log(first);
@@ -54,6 +64,7 @@ export function createBaseResolver<T extends ClassType, X extends ClassType>(
       return await Hotel.find();
     }
 
+    @UseMiddleware(isAuth, logger)
     @Mutation(() => returnType, { name: `create${suffix}` })
     async create(@Arg("data", () => inputType) data: any) {
       let { photos } = data;

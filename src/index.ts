@@ -7,6 +7,9 @@ import { GraphQLFormattedError, GraphQLError } from "graphql";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
+import morgan from "morgan";
+
+import { stream } from "../src/config/winston";
 
 import { redis } from "./redis";
 import { redisSessionPrefix } from "./constants";
@@ -77,6 +80,9 @@ const main = async () => {
   });
 
   const app = Express.default();
+
+  // do some stuff with logging
+  app.use(morgan("combined", { stream }));
 
   app.use(
     cors({

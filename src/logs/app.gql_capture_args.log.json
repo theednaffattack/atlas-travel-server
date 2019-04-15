@@ -1,0 +1,2 @@
+{"message":{"time":"2019-04-15T17:52:53.639Z","gqlQueryBody":"{\n  getAllHotel(first: 1) {\n    id\n    name\n  }\n}\n"},"level":"info"}
+{"message":{"time":"2019-04-15T17:53:47.326Z","gqlQueryBody":"{\n  getAllHotel(first: 1) {\n    id\n    name\n  }\n}\n"},"level":"info"}

@@ -8,6 +8,7 @@ import {
 import { Field, ID, ObjectType } from "type-graphql";
 
 import { Photo } from "./Photo";
+import { Rate } from "../modules/hotel/Rate";
 
 @ObjectType()
 @Entity()
@@ -27,6 +28,10 @@ export class Hotel extends BaseEntity {
   @Field()
   @Column()
   price: string;
+
+  // @ts-ignore
+  @Field(type => [Rate], { nullable: true })
+  ratings?: Rate[];
 
   @Field({ nullable: true })
   @Column({ default: 0 })
