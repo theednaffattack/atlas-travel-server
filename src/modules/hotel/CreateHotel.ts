@@ -2,7 +2,7 @@ import { Resolver } from "type-graphql";
 
 import { Hotel } from "../../entity/Hotel";
 import { HotelInput } from "./HotelInput";
-import { createBaseResolver } from "./BaseResolver";
+import { createBaseResolver } from "./BaseHotelResolver";
 const BaseCreateHotelResolver = createBaseResolver(
   "Hotel",
   Hotel,

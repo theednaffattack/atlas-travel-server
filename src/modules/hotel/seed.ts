@@ -1,4 +1,6 @@
 import casual from "casual";
+import { Hotel } from "../../entity/Hotel";
+import { User } from "../../entity/User";
 
 // const museum_photo = "../../static/images/discover/cards/ny_art_museum.png";
 // const hotel_photo = "../../static/images/discover/cards/hotel_table.png";
@@ -30,6 +32,13 @@ casual.define("hotel", function() {
   return {
     // id: casual.integer(0, 1000000000000000).toString(),
     photos: getPhotos,
+    address: casual.address1,
+    suite: casual.address2,
+    city: casual.city,
+    rooms: casual.integer(25, 150),
+    state: casual.state_abbr,
+    zipCode: casual.zip,
+    zipCodeSuffix: casual.integer(1000, 9999),
     name: `Hotel ${casual.last_name}`,
     price: casual.integer(250, 800).toString(),
     weatherIconName: casual.random_element(["sunny", "cloudy", "rain"]),
@@ -38,6 +47,20 @@ casual.define("hotel", function() {
     weatherDescription: casual.random_element(["Sunny", "Cloudy", "Rain"]),
     loveCount: casual.integer(3, 900),
     commentCount: casual.integer(4, 30)
+  };
+});
+
+casual.define("review", async function() {
+  let hotelArray = await Hotel.find();
+  let userArray = await User.find();
+  return {
+    // id: casual.integer(0, 1000000000000000).toString(),
+    value: casual.double(1, 5),
+    hotelId: hotelArray[casual.integer(0, hotelArray.length - 1)],
+    userId: userArray[casual.integer(0, userArray.length - 1)],
+    text: casual.description,
+    title: casual.title,
+    date: new Date().toUTCString()
   };
 });
 
@@ -59,7 +82,8 @@ export const array_of = function(times: number, genKey: string) {
 // const array_of_hotels = array_of(Math.floor(Math.random() * 20) + 4, "hotel");
 export const array_of_hotels = array_of(300, "hotel");
 
-export const make_array_of = (num: number) => array_of(num, "hotel");
+export const make_array_of = (num: number, entityName: string) =>
+  array_of(num, entityName);
 
 // console.log(array_of_hotels);
 

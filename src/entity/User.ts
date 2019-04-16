@@ -1,5 +1,12 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import {
+  BaseEntity,
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany
+} from "typeorm";
 import { Field, ID, ObjectType, Root } from "type-graphql";
+import { Review } from "./Review";
 
 @ObjectType()
 @Entity()
@@ -24,6 +31,16 @@ export class User extends BaseEntity {
   name(@Root() parent: User): string {
     return `${parent.firstName} ${parent.lastName}`;
   }
+
+  // @ts-ignore
+  @Field(type => Review, { nullable: true })
+  @OneToMany(() => Review, review => review.likes)
+  reviewLikes?: [];
+
+  // @ts-ignore
+  @Field(type => Review, { nullable: true })
+  @OneToMany(() => Review, review => review.hotel)
+  reviews?: [];
 
   @Column()
   password: string;

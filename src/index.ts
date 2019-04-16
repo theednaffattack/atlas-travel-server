@@ -42,6 +42,7 @@ const main = async () => {
       const { extensions = {}, locations, message, path } = error;
 
       if (error.originalError instanceof ArgumentValidationError) {
+        console.error(error);
         extensions.code = "GRAPHQL_VALIDATION_FAILED";
 
         return {
@@ -84,12 +85,36 @@ const main = async () => {
   // do some stuff with logging
   app.use(morgan("combined", { stream }));
 
-  app.use(
-    cors({
-      credentials: true,
-      origin: "http://localhost:3000"
-    })
-  );
+  const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:4000",
+    "http://192.168.1.40:3000",
+    "http://192.168.1.40:4000"
+  ];
+
+  const corsOptions = {
+    credentials: true,
+    origin: function(origin: any, callback: any) {
+      console.log("VIEW ORIGIN");
+      console.log(origin);
+
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        console.log("CORS IS GOOD");
+        callback(null, true);
+      } else {
+        console.error("origin ", origin);
+        console.error("Not allowd by CORS");
+        callback(new Error("Not allowed by CORS"));
+      }
+    }
+  };
+  app.use(cors(corsOptions));
+  // app.use(
+  //   cors({
+  //     credentials: true,
+  //     origin: "http://192.168.1.40:4000/"
+  //   })
+  // );
 
   app.use(
     session({

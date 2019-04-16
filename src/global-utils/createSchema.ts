@@ -13,6 +13,7 @@ import {
 } from "../modules/user/CreateUser";
 import { ProfilePictureResolver } from "../modules/user/ProfilePictureUpload";
 import { CreateHotelResolver } from "../modules/hotel/CreateHotel";
+import { CreateReviewsResolver } from "../modules/hotel/ratings/CreateReview";
 
 export const createSchema = () =>
   buildSchema({
@@ -27,7 +28,8 @@ export const createSchema = () =>
       MeResolver,
       ProfilePictureResolver,
       RegisterResolver,
-      CreateHotelResolver
+      CreateHotelResolver,
+      CreateReviewsResolver
     ],
     authChecker: ({ context: { req } }) => {
       // I can read context here
