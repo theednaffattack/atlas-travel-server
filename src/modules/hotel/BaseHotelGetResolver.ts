@@ -1,15 +1,15 @@
 import {
   Arg,
   ClassType,
-  Mutation,
-  // Query,
+  //   Mutation,
+  Query,
   Resolver,
   UseMiddleware
 } from "type-graphql";
 // import { GraphQLInt as Int } from "graphql";
 // import casual from "casual";
 
-import { Photo } from "../../entity/Photo";
+// import { Photo } from "../../entity/Photo";
 // import { Hotel } from "../../entity/Hotel";
 import { logger } from "../middleware/logger";
 import { isAuth } from "../middleware/isAuth";
@@ -41,12 +41,14 @@ import { isAuth } from "../middleware/isAuth";
 //   }
 // ];
 
-export function createBaseResolver<T extends ClassType, X extends ClassType>(
+export function getBaseResolver<T extends ClassType, X extends ClassType>(
   suffix: string,
-  returnType: T,
+  //   returnType: T,
   inputType: X,
-  entity: any
-  // objectTypeCls?: T
+  entity: any,
+  objectTypeCls: T,
+  relatedObjectCls1: any,
+  relatedObjectCls2: any
 ) {
   @Resolver({ isAbstract: true })
   abstract class BaseResolver {
@@ -54,34 +56,17 @@ export function createBaseResolver<T extends ClassType, X extends ClassType>(
     // for some reason I can't get the Typorm Repository to work. I may need
     // to think about how I'm using the connection manager.
 
-    // @UseMiddleware(isAuth, logger)
-    // @Query(() => [objectTypeCls], { name: `getAll${suffix}` })
-    // // @ts-ignore
-    // async getAll(@Arg("skip", () => Int) skip: number = 0) {
-    //   //Promise<T[]> {
-    //   return await Hotel.find();
-    // }
-
     @UseMiddleware(isAuth, logger)
-    @Mutation(() => returnType, { name: `create${suffix}` })
-    async create(@Arg("data", () => inputType) data: any) {
-      let { photos } = data;
-
-      // I need a small factory or loop that will
-      // dynamically access and save secondary repositories due
-      // to db relations
-      let photoEntitiesToSave = await Promise.all(
-        photos.map(async (photoInfo: any) => {
-          console.log("TRYING");
-          return await Photo.create(photoInfo).save();
-        })
-      );
-
-      let newEntity = entity.create(data);
-
-      newEntity.photos = [...photoEntitiesToSave];
-
-      return await newEntity.save();
+    @Query(() => [objectTypeCls], { name: `getAll${suffix}` })
+    // @ts-ignore
+    async getAll(@Arg("data", () => inputType) data: any) {
+      const dbQuery = {
+        skip: data.skip,
+        take: data.take,
+        relations: [relatedObjectCls1, relatedObjectCls2]
+      };
+      //Promise<T[]> {
+      return await entity.find(dbQuery);
     }
   }
 

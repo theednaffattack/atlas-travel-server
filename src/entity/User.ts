@@ -38,9 +38,9 @@ export class User extends BaseEntity {
   reviewLikes?: [];
 
   // @ts-ignore
-  @Field(type => Review, { nullable: true })
-  @OneToMany(() => Review, review => review.hotel)
-  reviews?: [];
+  @Field(type => [Review], { nullable: true })
+  @OneToMany(() => Review, review => review.user)
+  reviews?: Review[];
 
   @Column()
   password: string;

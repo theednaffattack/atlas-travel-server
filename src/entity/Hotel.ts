@@ -41,7 +41,7 @@ export class Hotel extends BaseEntity {
   // @ts-ignore
   @Field(type => [Review], { nullable: true })
   @OneToMany(() => Review, review => review.hotel)
-  reviews?: Review[];
+  reviews: Review[];
 
   @Field({ nullable: true })
   @Column({ default: 0 })

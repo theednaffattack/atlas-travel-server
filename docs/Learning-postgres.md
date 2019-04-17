@@ -7,6 +7,10 @@ createdb atlas_travel-TESTING
 
 CREATE USER appUser WITH PASSWORD 'JVkPNUjNPnCpKHTHA4ybmrYM';
 
+### Automatic timestamps
+
+https://x-team.com/blog/automatic-timestamps-with-postgresql/
+
 ## psql commands
 
 \du show all users
