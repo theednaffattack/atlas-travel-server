@@ -5,6 +5,7 @@ import {
   Query,
   Resolver,
   UseMiddleware
+  // Root
 } from "type-graphql";
 // import { GraphQLInt as Int } from "graphql";
 // import casual from "casual";
@@ -13,6 +14,7 @@ import {
 // import { Hotel } from "../../entity/Hotel";
 import { logger } from "../middleware/logger";
 import { isAuth } from "../middleware/isAuth";
+// import { Hotel } from "../../entity/Hotel";
 
 // const hotels: any = [
 //   {
@@ -57,7 +59,7 @@ export function getBaseResolver<T extends ClassType, X extends ClassType>(
     // to think about how I'm using the connection manager.
 
     @UseMiddleware(isAuth, logger)
-    @Query(() => [objectTypeCls], { name: `getAll${suffix}` })
+    @Query(() => [objectTypeCls], { name: `getAll${suffix}`, nullable: true })
     // @ts-ignore
     async getAll(@Arg("data", () => inputType) data: any) {
       const dbQuery = {

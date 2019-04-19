@@ -12,7 +12,10 @@ import {
   CreateProductResolver
 } from "../modules/user/CreateUser";
 import { ProfilePictureResolver } from "../modules/user/ProfilePictureUpload";
-import { CreateHotelResolver } from "../modules/hotel/CreateHotel";
+import {
+  CreateHotelResolver,
+  HotelAvgRatingResolver
+} from "../modules/hotel/CreateHotel";
 import { CreateReviewsResolver } from "../modules/hotel/ratings/CreateReview";
 
 export const createSchema = () =>
@@ -29,6 +32,7 @@ export const createSchema = () =>
       ProfilePictureResolver,
       RegisterResolver,
       CreateHotelResolver,
+      HotelAvgRatingResolver,
       CreateReviewsResolver
     ],
     authChecker: ({ context: { req } }) => {
