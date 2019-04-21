@@ -81,7 +81,14 @@ export class GetHotelResolver {
   @UseMiddleware(isAuth, logger)
   @Query(() => Hotel, { name: "getHotelByID" })
   async getHotelByID(@Arg("data", () => HotelGetInput) data: HotelGetInput) {
-    console.log(data);
+    const hotelFound = await Hotel.findOne({
+      where: { id: data.hotelId },
+      relations: ["rooms"]
+    });
+    console.log("hotelFound");
+    console.log(hotelFound);
+    return hotelFound;
+    // console.log(data);
   }
 }
 
