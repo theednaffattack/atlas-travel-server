@@ -13,7 +13,7 @@ import { stream } from "../src/config/winston";
 
 import { redis } from "./redis";
 import { redisSessionPrefix } from "./constants";
-import { createSchema } from "./global-utils/createSchema";
+import { createSchema } from "./global-utils/graphql/createSchema";
 // import queryComplexity, {
 //   fieldConfigEstimator,
 //   simpleEstimator

@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 import { Field, ID, ObjectType, Root } from "type-graphql";
 import { Review } from "./Review";
+import { Reservation } from "./Reservation";
 
 @ObjectType()
 @Entity()
@@ -31,6 +32,10 @@ export class User extends BaseEntity {
   name(@Root() parent: User): string {
     return `${parent.firstName} ${parent.lastName}`;
   }
+
+  // @ts-ignore
+  @OneToMany(type => Reservation, reservation => reservation.user)
+  reservations: Reservation[];
 
   // @ts-ignore
   @Field(type => Review, { nullable: true })

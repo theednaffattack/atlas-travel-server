@@ -2,6 +2,7 @@ import casual from "casual";
 import { Review } from "../../entity/Review";
 import { Hotel } from "../../entity/Hotel";
 import { User } from "../../entity/User";
+// import { Room } from "../../entity/Room";
 // import { Hotel } from "../../entity/Hotel";
 // import { User } from "../../entity/User";
 // import bcrypt from "bcryptjs";
@@ -47,12 +48,39 @@ casual.define("hotel", async function() {
     zipCodeSuffix: casual.integer(1000, 9999),
     name: `Hotel ${casual.last_name}`,
     price: casual.integer(250, 800).toString(),
+    amenities: casual.random_element([
+      "wifi",
+      "restaurant",
+      "pool",
+      "inn-bar",
+      "parking",
+      "night-club"
+    ]),
     weatherIconName: casual.random_element(["sunny", "cloudy", "rain"]),
     distanceKm: `${casual.integer(1, 30)}Km`,
     temperature: `${casual.integer(15, 25)}°`,
     weatherDescription: casual.random_element(["Sunny", "Cloudy", "Rain"]),
     loveCount: casual.integer(3, 900),
     commentCount: casual.integer(4, 30)
+  };
+});
+
+var roomTypes = ["standard", "villa", "penthouse", "studio"];
+
+casual.define("room", async function() {
+  return {
+    // id: "",
+    roomNumber: 0,
+    type: casual.random_element(roomTypes),
+    beds: casual.integer(1, 6),
+    maxOccupancy: casual.integer(1, 8),
+    costPerNight: casual.integer(50, 500),
+    reserved: [
+      { from: casual.date("2019-05-02"), to: casual.date("2019-05-07") },
+      { from: casual.date("2019-05-19"), to: casual.date("2019-05-23") },
+      { from: casual.date("2019-04-19"), to: casual.date("2019-04-30") }
+    ],
+    hotel: null
   };
 });
 

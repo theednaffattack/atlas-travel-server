@@ -14,7 +14,6 @@ import {
 // import { Hotel } from "../../entity/Hotel";
 import { logger } from "../middleware/logger";
 import { isAuth } from "../middleware/isAuth";
-import { Hotel } from "../../entity/Hotel";
 // import { Hotel } from "../../entity/Hotel";
 
 // const hotels: any = [
@@ -52,7 +51,7 @@ export function getBaseResolver<T extends ClassType, X extends ClassType>(
   objectTypeCls: T,
   relations: any[]
 ) {
-  @Resolver(() => Hotel, { isAbstract: true })
+  @Resolver({ isAbstract: true })
   abstract class BaseResolver {
     // I should use below for dependency injection at the entity level?
     // for some reason I can't get the Typorm Repository to work. I may need

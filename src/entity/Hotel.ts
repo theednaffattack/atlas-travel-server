@@ -10,6 +10,7 @@ import { Field, ID, ObjectType } from "type-graphql";
 import { Photo } from "./Photo";
 import { Review } from "./Review";
 import { Max } from "class-validator";
+import { Room } from "./Room";
 
 @ObjectType()
 @Entity()
@@ -30,10 +31,6 @@ export class Hotel extends BaseEntity {
   @Column()
   price: string;
 
-  @Field()
-  @Column()
-  rooms: number;
-
   @Field(() => [String], { nullable: true })
   @Column("simple-array", { nullable: true })
   amenities: string[];
@@ -42,6 +39,11 @@ export class Hotel extends BaseEntity {
   @Field(type => [Review], { nullable: true })
   @OneToMany(() => Review, review => review.hotel)
   reviews: Review[];
+
+  // @ts-ignore
+  @Field(type => [Room], { nullable: true })
+  @OneToMany(() => Room, room => room.hotel)
+  rooms: Room[];
 
   @Field({ nullable: true })
   @Column({ default: 0 })
