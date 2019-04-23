@@ -9,7 +9,7 @@ import { Field, ID, ObjectType } from "type-graphql";
 import { Room } from "./Room";
 import { User } from "./User";
 
-@ObjectType()
+@ObjectType("Reservation", { description: "The reservation model" })
 @Entity()
 export class Reservation extends BaseEntity {
   // @ts-ignore

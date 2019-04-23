@@ -1,17 +1,16 @@
 import { InputType, Field } from "type-graphql";
+import { addDays } from "date-fns";
 import { IsReservationAvailable } from "./isReservationAvailable";
-// import { User } from "../../../entity/User";
-// import { Hotel } from "../../../entity/Hotel";
 
 @InputType()
 export class DateInput {
   // @ts-ignore
   @Field(type => Date)
-  from: number = 0;
+  from: Date = new Date();
 
   // @ts-ignore
   @Field(type => Date)
-  to: number = 25;
+  to: Date = addDays(new Date(), 14);
 
   // @ts-ignore
   @Field(type => String)
