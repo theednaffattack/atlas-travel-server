@@ -1,7 +1,10 @@
 import { Resolver } from "type-graphql";
 // import { Resolver, Float, Query, FieldResolver, Root, Int } from "type-graphql";
 
-import { makeGetResolver } from "./BaseGetResolver";
+import {
+  makeGetResolver,
+  makeGetWithRelationsResolver
+} from "./BaseGetResolver";
 
 // import { HotelInput } from "./HotelInput";
 // import { BaseListInput } from "./BaseListInput";
@@ -14,6 +17,7 @@ import { createBaseResolverToo } from "./CreateReservation";
 // import { Hotel } from "../../entity/Hotel";
 import { Reservation } from "../../../entity/Reservation";
 import { ReservationInput } from "./ReservationInput";
+// import { BaseEntity } from "typeorm";
 // import { Photo } from "../../entity/Photo";
 // import { Review } from "../../entity/Review";
 
@@ -24,12 +28,43 @@ import { ReservationInput } from "./ReservationInput";
 //   // Hotel
 // );
 
-const BaseGetAllHotelResolver = makeGetResolver(
+const BaseGetAllReservationsResolver = makeGetResolver(
   Reservation,
   "Reservation",
   Reservation
   //   ["photos", "reviews", "rooms"]
 );
+
+export const GetReservationsByHotelId = makeGetWithRelationsResolver(
+  Reservation,
+  "Reservation",
+  Reservation,
+  ["room", "room.reserved"]
+);
+
+// interface RandomObj {
+//   [key: string]: any;
+// }
+
+// @ObjectType()
+// class Errors {
+//   @Field(() => String)
+//   error: string;
+//   @Field(() => String)
+//   message: string;
+//   @Field(() => Reservation)
+//   reservationFound: Reservation;
+//   @Field(() => String)
+//   ogData: string;
+// }
+
+// @ObjectType()
+// class CustomReservationReturnType {
+//   @Field(() => [Reservation])
+//   data: Reservation[];
+//   @Field(() => [Errors])
+//   errors: Errors[];
+// }
 
 const CreateReservationResolverBase = createBaseResolverToo(
   "Reservation",
@@ -39,7 +74,7 @@ const CreateReservationResolverBase = createBaseResolverToo(
 );
 
 @Resolver()
-export class GetAlReservationsResolver extends BaseGetAllHotelResolver {}
+export class GetAllReservationsResolver extends BaseGetAllReservationsResolver {}
 
 @Resolver()
 export class CreateReservationResolver extends CreateReservationResolverBase {

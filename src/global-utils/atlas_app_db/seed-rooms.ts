@@ -14,10 +14,10 @@ import { Reservation } from "../../entity/Reservation";
 //   );
 // }
 
-interface GetArgs {
-  skip: number;
-  take: number;
-}
+// interface GetArgs {
+//   skip: number;
+//   take: number;
+// }
 
 // interface FakeHotel {
 //   id: string;
@@ -37,19 +37,19 @@ async function saveRelation(relation: Reservation[], entity: any) {
 
 createConnection(ormconfig)
   .then(async () => {
-    const getHotels = async ({ skip, take }: GetArgs) => {
-      return await Hotel.find({ skip, take, select: ["id"] });
-      //   try {
-      //     return await Hotel.find({ skip, take, select: ["id"] })
-      //       .then()
-      //       .catch();
-      //   } catch (error) {
-      //     console.error(error);
-      //     return "Nooooo";
-      //   }
-    };
+    // const getHotels = async ({ skip, take }: GetArgs) => {
+    //   return await Hotel.find({ skip, take, select: ["id"] });
+    //   //   try {
+    //   //     return await Hotel.find({ skip, take, select: ["id"] })
+    //   //       .then()
+    //   //       .catch();
+    //   //   } catch (error) {
+    //   //     console.error(error);
+    //   //     return "Nooooo";
+    //   //   }
+    // };
 
-    const mySkip = 61;
+    // const mySkip = 61;
     const myTake = 20;
 
     // const realSkip = 0;
@@ -57,15 +57,18 @@ createConnection(ormconfig)
 
     const rooms = await make_array_of(myTake, "room");
 
-    const bunchaHotels = await getHotels({ skip: mySkip, take: myTake });
+    // const bunchaHotels = await getHotels({ skip: mySkip, take: myTake });
 
     // @ts-ignore
     const transformed = rooms.map(async (room: any, index: number) => {
+      let findOneHotel = await Hotel.findOne({
+        where: { id: "001abf74-791c-4f52-baea-f2046ce3426c" }
+      });
       console.log("BEFORE HOTEL");
       console.log(room);
       let newRoom = Room.create(room);
       // @ts-ignore
-      newRoom.hotel = bunchaHotels[0];
+      newRoom.hotel = findOneHotel;
       newRoom.roomNumber = (index + 1).toString();
       console.log("WITH HOTEL");
       console.log(newRoom);

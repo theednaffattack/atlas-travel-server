@@ -5,7 +5,7 @@ import { redis } from "../../redis";
 import { User } from "../../entity/User";
 import { forgotPasswordPrefix } from "../constants/redisPrefixes";
 import { ChangePasswordInput } from "./changePassword/ChangePasswordInput";
-import { MyContext } from "src/types/MyContext";
+import { MyContext } from "../../types/MyContext";
 
 @Resolver()
 export class ChangePasswordResolver {

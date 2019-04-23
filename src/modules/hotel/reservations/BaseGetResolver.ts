@@ -52,3 +52,38 @@ export function makeGetResolver<T extends ClassType>(
 
   return BaseFindResolver;
 }
+
+export function makeGetWithRelationsResolver<T extends ClassType>(
+  objectTypeCls: T,
+  suffix: string,
+  entity: any,
+  relations: string[]
+) {
+  @Resolver({ isAbstract: true })
+  abstract class BaseFindResolver {
+    constructor(
+      // constructor injection of a service
+      private readonly Entity: any = entity
+    ) {}
+    // I should use below for dependency injection at the entity level?
+    // for some reason I can't get the Typorm Repository to work. I may need
+    // to think about how I'm using the connection manager.
+
+    @UseMiddleware(isAuth, logger)
+    @Query(() => [objectTypeCls], { name: `getAll${suffix}` })
+    async getAll() {
+      //   const dbQuery: queryObj = {
+      //     // relations: [...relations]
+      //   };
+
+      return await entity.find();
+    }
+
+    @Query(() => [objectTypeCls], { name: `get${suffix}ById` })
+    async getAllToo() {
+      return await this.Entity.find({ relations });
+    }
+  }
+
+  return BaseFindResolver;
+}

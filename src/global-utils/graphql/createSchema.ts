@@ -21,9 +21,10 @@ import {
 import { CreateReviewsResolver } from "../../modules/hotel/reviews/CreateReview";
 
 import {
-  GetAlReservationsResolver,
+  GetAllReservationsResolver,
   CreateReservationResolver
 } from "../../modules/hotel/reservations/ExportedResolvers";
+import { GetReservationByHotelIDAndDateFilterResolver } from "../../modules/hotel/reservations/GetReservationByHotelIDAndDateFilterResolver";
 
 export const createSchema = () =>
   buildSchema({
@@ -37,7 +38,8 @@ export const createSchema = () =>
       CreateUserResolver,
       ForgotPasswordResolver,
       GetAllHotelResolver,
-      GetAlReservationsResolver,
+      GetAllReservationsResolver,
+      GetReservationByHotelIDAndDateFilterResolver,
       HotelAvgRatingResolver,
       HotelCountReviewsResolver,
       LoginResolver,
