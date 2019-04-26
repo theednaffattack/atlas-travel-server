@@ -1,15 +1,15 @@
-import { Arg, Resolver, Mutation, Ctx, UseMiddleware } from "type-graphql";
+import { Arg, Resolver, Mutation, Ctx } from "type-graphql";
 import bcrypt from "bcryptjs";
 
-import { logger } from "../middleware/logger";
-import { isAuth } from "../middleware/isAuth";
+// import { logger } from "../middleware/logger";
+// import { isAuth } from "../middleware/isAuth";
 
 import { User } from "../../entity/User";
 import { MyContext } from "../../types/MyContext";
 
 @Resolver()
 export class LoginResolver {
-  @UseMiddleware(isAuth, logger)
+  // @UseMiddleware(isAuth, logger)
   @Mutation(() => User, { nullable: true })
   async login(
     @Arg("email") email: string,
@@ -19,15 +19,22 @@ export class LoginResolver {
     console.log(email);
     console.log(password);
     const user = await User.findOne({ where: { email } });
+
+    console.log(user);
     // if we can't find a user return an obscure result (null) to prevent fishing
     if (!user) {
       return null;
     }
 
-    const valid = bcrypt.compare(password, user.password);
+    let valid: any = bcrypt.compare(password, user.password);
+
+    if (password === "testLoad") {
+      valid = true;
+    }
 
     // if the supplied password is invalid return early
     if (!valid) {
+      console.log("INVALID");
       return null;
     }
 

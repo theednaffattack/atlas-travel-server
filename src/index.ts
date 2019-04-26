@@ -6,7 +6,7 @@ import { createConnection } from "typeorm";
 import { GraphQLFormattedError, GraphQLError } from "graphql";
 import session from "express-session";
 import connectRedis from "connect-redis";
-import cors from "cors";
+// import cors from "cors";
 import morgan from "morgan";
 
 import { stream } from "../src/config/winston";
@@ -108,13 +108,15 @@ const main = async () => {
       }
     }
   };
-  app.use(cors(corsOptions));
+
   // app.use(
   //   cors({
   //     credentials: true,
   //     origin: "http://192.168.1.40:4000/"
   //   })
   // );
+
+  // app.use(cors(corsOptions));
 
   app.use(
     session({
@@ -134,7 +136,10 @@ const main = async () => {
     })
   );
 
-  apolloServer.applyMiddleware({ app, cors: false });
+  apolloServer.applyMiddleware({
+    app,
+    cors: corsOptions
+  });
 
   app.listen(4000, () => {
     console.log(
