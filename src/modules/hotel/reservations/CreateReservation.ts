@@ -2,25 +2,17 @@ import {
   Arg,
   ClassType,
   Mutation,
-  // Query,
   Resolver,
   UseMiddleware
 } from "type-graphql";
 import { isWithinRange } from "date-fns";
-// import { GraphQLInt as Int } from "graphql";
-// import casual from "casual";
-
-// import { Photo } from "../../entity/Photo";
-// import { Hotel } from "../../entity/Hotel";
 
 import { logger } from "../../middleware/logger";
 import { isAuth } from "../../middleware/isAuth";
-// import { GetAlReservationsResolver } from "./ExportedResolvers";
-// import { Reservation } from "../../../entity/Reservation";
-// import { Between } from "typeorm";
 import { Hotel } from "../../../entity/Hotel";
 import { Reservation } from "../../../entity/Reservation";
-// import { Hotel } from "../../../entity/Hotel";
+import { Room } from "../../../entity/Room";
+import { User } from "../../../entity/User";
 
 export function createBaseResolverToo<T extends ClassType, X extends ClassType>(
   suffix: string,
@@ -30,10 +22,6 @@ export function createBaseResolverToo<T extends ClassType, X extends ClassType>(
 ) {
   @Resolver({ isAbstract: true })
   abstract class BaseCreateResolver {
-    // I should use below for dependency injection at the entity level?
-    // for some reason I can't get the Typorm Repository to work. I may need
-    // to think about how I'm using the connection manager.
-
     @UseMiddleware(isAuth, logger)
     @Mutation(() => returnType, { name: `create${suffix}` })
     async create(@Arg("data", () => inputType) data: any) {
@@ -41,115 +29,79 @@ export function createBaseResolverToo<T extends ClassType, X extends ClassType>(
       // dynamically access and save secondary repositories due
       // to db relations
 
-      // const AfterDate = (date: Date) => Between(date, addYears(date, 100));
-      //   const BeforeDate = (date: Date) =>
-      //     Between(data.from, subYears(data.from, 100));
-
-      //   let getHotel = await Hotel.find({
-      //     relations: ["rooms"],
-      //     where: { id: data.hotelId }
-      //   });
-
       let findTheHotel: any;
-      let errorsCollected: any[] = [];
 
-      let dataCollected: any[] = [];
+      let isFromInRange = (data: any, reservation: any) =>
+        isWithinRange(data.dates.from, reservation.from, reservation.to);
+      let isToInRange = (data: any, reservation: any) =>
+        isWithinRange(data.dates.to, reservation.from, reservation.to);
 
-      try {
-        findTheHotel = await Hotel.findOne({
-          relations: ["rooms", "rooms.reserved"],
-          // select: ["rooms"],
-          where: { id: data.hotelId }
-          // join: {
-          //   alias: "hotel",
-          //   leftJoinAndSelect: {
-          //     rooms: "hotel.rooms",
-          //     reserved: "rooms.reserved"
-          //   }
-          // }
+      findTheHotel = await Hotel.findOne({
+        relations: ["rooms", "rooms.reserved"],
+        where: { id: data.hotelId }
+      });
+
+      let availableHotelRooms = findTheHotel.rooms.filter((room: any) => {
+        let resMappings: Boolean[] = room.reserved.map((reservation: any) => {
+          // we're returning a Boolean into the array
+          // false = unavailable (reserved), true = available (no overlapping dates)
+          return (
+            !isFromInRange(data, reservation) && !isToInRange(data, reservation)
+          );
         });
 
-        let [getTheReservations] = findTheHotel.rooms.map(
-          (hotel: any) => hotel.reserved
-        );
+        // filter out rooms that have reservations that
+        // overlap either of the requested reservation dates
+        return !resMappings.includes(false);
+      });
+      console.log("FILTERED HOTEL ROOMS");
 
-        let process = getTheReservations.map(async (reservation: any) => {
-          // console.log(index);
-          // console.log(reservation);
-          // let isItBetween = Between(data.from, data.to);
-          // console.log("SIMPLE COMPARISION");
-          let isFromInRange = isWithinRange(
-            data.from,
-            reservation.from,
-            reservation.to
-          );
-          let isToInRange = isWithinRange(
-            data.to,
-            reservation.from,
-            reservation.to
-          );
-          // console.log(reservation.from > data.from);
-          // console.log("ISITBETWEEN?");
-          // console.log(isItBetween);
-          // console.log("ISFROMINRANGE?");
-          // console.log(isFromInRange);
-          // console.log("ISTOINRANGE?");
-          // console.log(isToInRange);
+      console.log(`We found ${findTheHotel.rooms.length} hotel rooms!`);
+      console.log(`${availableHotelRooms.length} are available to reserve.`);
+      // console.log(JSON.stringify(availableHotelRooms, null, 2));
 
-          if (isFromInRange || isToInRange) {
-            errorsCollected.push({
-              error: "Booking error",
-              message: "Room unavailable during dates selected",
-              reservationFound: {
-                id: reservation.id,
-                from: reservation.from,
-                to: reservation.to
-              },
-              ogData: JSON.stringify(data)
-            });
-          }
-          if (!isFromInRange && !isToInRange) {
-            dataCollected.push(
-              { newReservation: await Reservation.create(data).save() },
-              reservation
-            );
-          }
+      console.log(entity ? "yep entity" : "nope no entity");
 
-          // console.log({
-          //   data: dataCollected,
-          //   errors: errorsCollected
-          // });
+      const getRoom = await Room.findOne({
+        where: { id: availableHotelRooms[0].id },
+        relations: ["reserved"]
+      });
+      const getUser = await User.findOne({
+        where: { id: data.userId }
+      });
 
-          return {
-            data: dataCollected,
-            errors: errorsCollected
-          };
-        });
+      const newReservation = await Reservation.create({
+        from: data.dates.from,
+        to: data.dates.to,
+        user: getUser,
+        room: getRoom
+      }).save();
 
-        console.log(JSON.stringify(await Promise.all(process), null, 2));
+      let existingReservations = getRoom ? getRoom.reserved : [];
 
-        // console.log("findTheHotel");
-        // console.log(findTheHotel);
-        // // console.log("getTheReservations");
-        // console.log(getTheReservations);
-      } catch (error) {
-        console.error(error);
+      let updatedRoom;
+
+      if (getRoom && existingReservations && existingReservations.length > 0) {
+        getRoom.reserved = [...existingReservations, newReservation];
+        updatedRoom = await getRoom.save();
+        newReservation.room = updatedRoom;
       }
 
-      // let findTheReservations: any = findTheHotel!.reserved;
+      console.log(newReservation);
 
-      // let findOpenDates = await Reservation.find({
-      //   relations: ["room", "user", "room.hotel"],
-      //   where: {
-      //     room: { hotel: data.hotelId }
+      return newReservation;
+
+      // UP NEXT
+      // grab a room from `availableHotelRooms` and create a reservation
+      // return that reservation (signature below) to the graphql API
+
+      // type Reservation {
+      //   id: ID!
+      //   from: DateTime!
+      //   to: DateTime!
+      //   user: User!
+      //   room: Room!
       //   }
-      // });
-
-      // console.log(data);
-      // console.log(AfterDate(data.from));
-      console.log(entity ? "yep entity" : "nope no entity");
-      // console.log(findTheHotel);
-      //   return await entity.create(data).save();
     }
   }
 
