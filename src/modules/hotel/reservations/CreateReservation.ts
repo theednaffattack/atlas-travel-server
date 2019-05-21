@@ -85,6 +85,8 @@ export function createBaseResolverToo<T extends ClassType, X extends ClassType>(
         getRoom.reserved = [...existingReservations, newReservation];
         updatedRoom = await getRoom.save();
         newReservation.room = updatedRoom;
+      } else {
+        throw Error("No reservations available!");
       }
 
       console.log(newReservation);

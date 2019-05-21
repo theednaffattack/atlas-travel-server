@@ -11,6 +11,8 @@ import {
   Field,
   ID
 } from "type-graphql";
+// import { Min, Max } from "class-validator";
+import { addDays } from "date-fns";
 
 import { HotelInput } from "./HotelInput";
 import { BaseListInput } from "./BaseListInput";
@@ -31,10 +33,70 @@ const BaseCreateHotelResolver = createBaseResolver(
   // Hotel
 );
 
+@InputType()
+class PriceRangeInput {
+  // @ts-ignore
+  @Field(type => Int, { nullable: true })
+  low: string;
+  // @ts-ignore
+  @Field(type => Int, { nullable: true })
+  high: string;
+}
+
+@InputType()
+export class DateInputSimple {
+  // @ts-ignore
+  @Field(type => Date, { nullable: true })
+  from: Date = new Date();
+
+  // @ts-ignore
+  @Field(type => Date, { nullable: true })
+  to: Date = addDays(new Date(), 14);
+}
+@InputType()
+export class Amenity {
+  // @ts-ignore
+  @Field(type => String, { nullable: true })
+  name: string[];
+}
+
+@InputType()
+export class GetAllHotelInput extends BaseListInput {
+  // @ts-ignore
+  @Field(type => DateInputSimple, { nullable: true })
+  dates: object;
+
+  // @ts-ignore
+  @Field(type => Date, { nullable: true })
+  from: Date;
+
+  // @ts-ignore
+  @Field(type => Date, { nullable: true })
+  to: Date;
+
+  // @ts-ignore
+  @Field(type => PriceRangeInput, { nullable: true })
+  prices: object;
+
+  // @ts-ignore
+  @Field(type => Amenity, {
+    nullable: "itemsAndList"
+  })
+  amenities: string[];
+
+  // // @ts-ignore
+  // @Field(type => Int)
+  // low: number;
+
+  // // @ts-ignore
+  // @Field(type => Int)
+  // high: number;
+}
+
 const BaseGetAllHotelResolver = getBaseResolver(
   "Hotel",
   // Hotel,
-  BaseListInput,
+  GetAllHotelInput,
   Hotel,
   Hotel,
   ["photos", "reviews", "rooms"]

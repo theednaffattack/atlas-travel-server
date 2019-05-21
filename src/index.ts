@@ -6,22 +6,22 @@ import { createConnection } from "typeorm";
 import { GraphQLFormattedError, GraphQLError } from "graphql";
 import session from "express-session";
 import connectRedis from "connect-redis";
+// import { SubscriptionServer } from "subscriptions-transport-ws";
 // import cors from "cors";
 import morgan from "morgan";
+// import { SubscriptionServer } from "subscriptions-transport-ws";
+// import { execute, subscribe } from "graphql";
+import { createServer } from "http";
 
 import { stream } from "../src/config/winston";
 
 import { redis } from "./redis";
 import { redisSessionPrefix } from "./constants";
 import { createSchema } from "./global-utils/graphql/createSchema";
-// import queryComplexity, {
-//   fieldConfigEstimator,
-//   simpleEstimator
-// } from "graphql-query-complexity";
-// import { RegisterResolver } from "./modules/user/Register";
-// import { LoginResolver } from "./modules/user/Login";
-// import { MeResolver } from "./modules/user/Me";
-// import { ConfirmUserResolver } from "./modules/user/ConfirmUser";
+
+// import serveStatic = require("serve-static");
+
+const PORT = process.env.PORT || 7777;
 
 const RedisStore = connectRedis(session);
 
@@ -30,8 +30,49 @@ const main = async () => {
 
   const schema = await createSchema();
 
+  // @ts-ignore
   const apolloServer = new ApolloServer({
     schema,
+
+    tracing: true,
+    // subscriptions: {
+    //   path: "subscriptions"
+    // },
+    subscriptions: {
+      // path: "subscriptions",
+      // onConnect: (connectionParams, webSocket, context) => {
+      //   // HERE WE WOULD TAKE THE AUTH TOKEN
+      //   // AND VALIDATE BY LOOKING UP IN REDIS?
+      //   // THEN LOOKUP THE USER IN THE DB? NOT SURE
+      //   // if (connectionParams.authToken) {
+      //   //   return validateToken(connectionParams.authToken)
+      //   //     .then(findUser(connectionParams.authToken))
+      //   //     .then(user => {
+      //   //       return {
+      //   //         currentUser: user
+      //   //       };
+      //   //     });
+      //   // }
+
+      //   // throw new Error("Missing auth token!");
+      //   console.log("subscriptions connected!");
+      //   console.log(Object.keys(connectionParams));
+      //   console.log(Object.keys(webSocket));
+      //   console.log(Object.keys(context));
+      // },
+      path: "/subscriptions",
+      onConnect: context => {
+        console.log("Connected to websocket");
+        console.log(context);
+      },
+
+      onDisconnect: context => {
+        // ...
+        console.log("subscriptions closing (disconnect)");
+        // console.log(webSocket);
+        console.log(context);
+      }
+    },
     context: ({ req, res }: any) => ({ req, res }),
     // custom error handling from: https://github.com/19majkel94/type-graphql/issues/258
     formatError: (error: GraphQLError): GraphQLFormattedError => {
@@ -81,6 +122,25 @@ const main = async () => {
   });
 
   const app = Express.default();
+  // Wrap the Express server
+  const wsServer = createServer(app);
+
+  apolloServer.installSubscriptionHandlers(wsServer);
+  // ws.listen(PORT, () => {
+  //   console.log(`GraphQL Server is now running on http://localhost:${PORT}`);
+  //   // Set up the WebSocket for handling GraphQL subscriptions
+  //   new SubscriptionServer(
+  //     {
+  //       execute,
+  //       subscribe,
+  //       schema
+  //     },
+  //     {
+  //       server: ws,
+  //       path: "/subscriptions"
+  //     }
+  //   );
+  // });
 
   // do some stuff with logging
   app.use(morgan("combined", { stream }));
@@ -137,13 +197,22 @@ const main = async () => {
   );
 
   apolloServer.applyMiddleware({
-    app,
-    cors: corsOptions
+    cors: corsOptions,
+    app
   });
 
-  app.listen(4000, () => {
+  wsServer.listen(4000, () => {
+    console.log("\n\n");
     console.log(
-      "server started! GraphQL Playground available at:\nhttp://localhost:4000/graphql"
+      `🚀  Server started! GraphQL Playground ready at:\nhttp://localhost:${PORT}${
+        apolloServer.graphqlPath
+      }`
+    );
+    console.log("\n\n");
+    console.log(
+      `🚀 Subscriptions ready at:\nws://localhost:${PORT}${
+        apolloServer.subscriptionsPath
+      }`
     );
   });
 };

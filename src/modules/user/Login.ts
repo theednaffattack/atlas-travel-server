@@ -49,6 +49,8 @@ export class LoginResolver {
 
     // all is well return the user we found
     ctx.req.session!.userId = user.id;
+    console.log(ctx.req.session);
+    // ctx.res.send(user);
     return user;
   }
 }

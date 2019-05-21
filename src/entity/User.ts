@@ -8,6 +8,7 @@ import {
 import { Field, ID, ObjectType, Root } from "type-graphql";
 import { Review } from "./Review";
 import { Reservation } from "./Reservation";
+import { Message } from "./Message";
 
 @ObjectType()
 @Entity()
@@ -32,6 +33,11 @@ export class User extends BaseEntity {
   name(@Root() parent: User): string {
     return `${parent.firstName} ${parent.lastName}`;
   }
+
+  // @ts-ignore
+  @Field(type => [Message], { nullable: true })
+  @OneToMany(() => Message, message => message.user)
+  messages?: Message[];
 
   // @ts-ignore
   @OneToMany(type => Reservation, reservation => reservation.user)

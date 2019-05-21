@@ -1,5 +1,5 @@
 import { Resolver, Mutation, Ctx } from "type-graphql";
-import { MyContext } from "src/types/MyContext";
+import { MyContext } from "../../types/MyContext";
 
 @Resolver()
 export class LogoutResolver {
@@ -8,6 +8,7 @@ export class LogoutResolver {
     @Ctx()
     ctx: MyContext
   ): Promise<Boolean> {
+    console.log("IS LOGOUT TRIGGERED?");
     return new Promise((resolve, reject) => {
       return ctx.req.session!.destroy(err => {
         if (err) {

@@ -60,7 +60,7 @@ export function getBaseResolver<T extends ClassType, X extends ClassType>(
     @UseMiddleware(isAuth, logger)
     @Query(() => [objectTypeCls], { name: `getAll${suffix}`, nullable: true })
     // @ts-ignore
-    async getAll(@Arg("data", () => inputType) data: any) {
+    async getAll(@Arg("data", () => inputType, { nullable: true }) data: any) {
       const dbQuery = {
         skip: data.skip,
         take: data.take,
