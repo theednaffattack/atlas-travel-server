@@ -11,6 +11,9 @@ export class MeResolver {
   @Query(() => User, { nullable: true })
   async me(@Ctx() ctx: MyContext): Promise<User | undefined> {
     // if we can't find a userId on the current session
+    console.log("INSIDE ME RESOLVER");
+    // console.log(ctx && ctx.req.session);
+    console.log(Object.keys(ctx.req));
     if (!ctx.req.session!.userId) {
       return undefined;
     }

@@ -25,10 +25,46 @@ const PORT = process.env.PORT || 7777;
 
 const RedisStore = connectRedis(session);
 
+const sessionMiddleware = session({
+  name: "qid",
+  secret: process.env.SESSION_SECRET as string,
+  store: new RedisStore({
+    client: redis as any,
+    prefix: redisSessionPrefix
+  }),
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+  }
+});
+
+const getContextFromHttpRequest = (req: any) => {
+  // const { userId } = req.session;
+  console.log("getContextFromHttpRequest RUNNING");
+  // console.log(Object.keys(req));
+  console.log(req.session);
+  console.log(req.session.cookie);
+  console.log(req.userId);
+  return { userId: req.session.userId };
+};
+
+const getContextFromSubscription = (connection: any) => {
+  // const { userId } = connection.context;
+  const userId = connection.context.req.session.userId;
+  console.log("getContextFromSubscription RUNNING");
+  console.log(userId);
+  return { userId };
+};
+
 const main = async () => {
   await createConnection();
 
   const schema = await createSchema();
+
+  // const sessionMiddleware = session({});
 
   // @ts-ignore
   const apolloServer = new ApolloServer({
@@ -39,41 +75,60 @@ const main = async () => {
     //   path: "subscriptions"
     // },
     subscriptions: {
-      // path: "subscriptions",
-      // onConnect: (connectionParams, webSocket, context) => {
-      //   // HERE WE WOULD TAKE THE AUTH TOKEN
-      //   // AND VALIDATE BY LOOKING UP IN REDIS?
-      //   // THEN LOOKUP THE USER IN THE DB? NOT SURE
-      //   // if (connectionParams.authToken) {
-      //   //   return validateToken(connectionParams.authToken)
-      //   //     .then(findUser(connectionParams.authToken))
-      //   //     .then(user => {
-      //   //       return {
-      //   //         currentUser: user
-      //   //       };
-      //   //     });
-      //   // }
-
-      //   // throw new Error("Missing auth token!");
-      //   console.log("subscriptions connected!");
-      //   console.log(Object.keys(connectionParams));
-      //   console.log(Object.keys(webSocket));
-      //   console.log(Object.keys(context));
-      // },
       path: "/subscriptions",
-      onConnect: context => {
-        console.log("Connected to websocket");
-        console.log(context);
+      onConnect: (_, webSocket: any) => {
+        console.log("Connected to websocket".toUpperCase());
+        return new Promise(resolve =>
+          sessionMiddleware(webSocket.upgradeReq, {} as any, () => {
+            console.log("webSocket.upgradeReq");
+            console.log(webSocket.upgradeReq.session);
+            resolve({
+              req: webSocket.upgradeReq
+              // userId: webSocket.upgradeReq.session.userId
+            });
+          })
+        );
       },
 
-      onDisconnect: context => {
+      onDisconnect: () => {
         // ...
         console.log("subscriptions closing (disconnect)");
         // console.log(webSocket);
-        console.log(context);
+        // console.log(context);
       }
     },
-    context: ({ req, res }: any) => ({ req, res }),
+    context: ({ req, connection }: any) => {
+      console.log(
+        "READ CONTEXT IN APOLLO SERVER CONFIG\nhey what's going on? there's no userId yet"
+      );
+      // if (connection) {
+      //   console.log("RETURNING THE FIRST OPTION");
+      //   console.log(Object.keys(connection.context));
+      //   return connection.context;
+      // } else {
+      //   console.log(req && req.session);
+      //   console.log(req ? Object.keys(req) : "no req");
+      //   console.log(connection ? Object.keys(connection) : "no connection");
+      //   console.log(connection);
+      //   console.log("RETURNING THE SECOND OPTION");
+      //   // console.log({ req, userInfo: req.session.userId });
+      //   return { req, res, connection };
+      // }
+
+      if (connection) {
+        console.log("CONNECTION SENSED");
+        console.log(getContextFromSubscription(connection));
+        return getContextFromSubscription(connection);
+      }
+
+      console.log("CONNECTION NOT SENSED, LOOKING FOR REQ OBJECT");
+      console.log(req.session);
+      // console.log(connection && connection.context ? connection.context : null);
+      console.log(getContextFromHttpRequest(req));
+      return getContextFromHttpRequest(req);
+
+      // return { req, res, connection };
+    },
     // custom error handling from: https://github.com/19majkel94/type-graphql/issues/258
     formatError: (error: GraphQLError): GraphQLFormattedError => {
       if (error.originalError instanceof ApolloError) {
@@ -123,9 +178,6 @@ const main = async () => {
 
   const app = Express.default();
   // Wrap the Express server
-  const wsServer = createServer(app);
-
-  apolloServer.installSubscriptionHandlers(wsServer);
   // ws.listen(PORT, () => {
   //   console.log(`GraphQL Server is now running on http://localhost:${PORT}`);
   //   // Set up the WebSocket for handling GraphQL subscriptions
@@ -149,7 +201,8 @@ const main = async () => {
     "http://localhost:3000",
     "http://localhost:4000",
     "http://192.168.1.40:3000",
-    "http://192.168.1.40:4000"
+    "http://192.168.1.40:4000",
+    "ws://192.168.1.40:4000"
   ];
 
   const corsOptions = {
@@ -177,24 +230,11 @@ const main = async () => {
   // );
 
   // app.use(cors(corsOptions));
+  const wsServer = createServer(app);
 
-  app.use(
-    session({
-      name: "qid",
-      secret: process.env.SESSION_SECRET as string,
-      store: new RedisStore({
-        client: redis as any,
-        prefix: redisSessionPrefix
-      }),
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
-      }
-    })
-  );
+  apolloServer.installSubscriptionHandlers(wsServer);
+
+  app.use(sessionMiddleware);
 
   apolloServer.applyMiddleware({
     cors: corsOptions,

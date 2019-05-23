@@ -85,9 +85,14 @@ export const createSchema = () =>
       RegisterResolver
     ],
     authChecker: ({ context: { req } }) => {
+      console.log(
+        "authChecker running this is where type-graphql checks?".toUpperCase()
+      );
+      console.log(req);
       // I can read context here
       // cehck permission vs what's in the db "roles" argument
       // that comes from `@Authorized`, eg,. ["ADMIN", "MODERATOR"]
-      return !!req.session.userId;
+      // return !!req.session.userId;
+      return !!req.userId;
     }
   });

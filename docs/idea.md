@@ -18,3 +18,65 @@ https://www.youtube.com/watch?v=EuaVr7vFF5E
 
 https://www.apollographql.com/docs/apollo-server/features/subscriptions#middleware
 https://github.com/apollographql/apollo-server/issues/1902
+
+## context with GraphQL Subscriptions
+
+From: https://github.com/apollographql/apollo-server/issues/2315#issuecomment-466130174
+
+```javascript
+  context: ({ req, connection }) => {
+    if (connection) {
+      return getContextFromSubscription(connection);
+    }
+    return getContextFromHttpRequest(req);
+  },
+```
+
+where getContextFromHttpRequest could be a user defined function (likely with not such a lengthy name), like
+
+```javascript
+const getContextFromHttpRequest = ({ req }: { req: $Request }): Params => {
+    const auth = req.get('authorization')
+    const match = /^Bearer (.*)$/i.exec(auth || '')
+    const authToken = match ? match[1] : null
+    return {
+      authToken,
+      user: await getUserByToken(null, authToken)),
+    }
+  }
+```
+
+What do you think?
+
+
+
+Earlier
+
+```javascript
+  getParamsFromRequest: ({ req }) => {
+    const auth = req.get('authorization')
+    const match = /^Bearer (.*)$/i.exec(auth || '')
+    const authToken = match ? match[1] : null
+    return { authToken }
+  }
+```
+
+Would be...
+
+```javascript
+const getContextFromSubscription = ({ connection }) => {
+    return {userId} = connection.context;
+}
+```
+
+and
+
+
+
+```javascript
+const getContextFromHttpRequest = ({req}) => {
+  const {userId} = request.session;
+  return {userId}
+}
+```
+

@@ -48,8 +48,12 @@ export class LoginResolver {
     // console.log(JSON.stringify(ctx.req.session));
 
     // all is well return the user we found
-    ctx.req.session!.userId = user.id;
-    console.log(ctx.req.session);
+    // ctx.req.session!.userId = user.id;
+    ctx.userId = user.id;
+    // ctx.req.session!.userId = user.id;
+    console.log("ctx.userId inside login resolver".toUpperCase());
+    console.log(ctx.userId);
+    // console.log(ctx.req.session!.userId);
     // ctx.res.send(user);
     return user;
   }

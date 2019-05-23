@@ -8,7 +8,8 @@ import {
   Root,
   Args,
   Resolver,
-  ResolverFilterData
+  ResolverFilterData,
+  Ctx
 } from "type-graphql";
 
 // import { MessageInput, MessageOutput } from "./MessageInput";
@@ -16,12 +17,23 @@ import { MessageInput } from "./MessageInput";
 import { Message } from "../../entity/Message";
 import { User } from "../../entity/User";
 import { MessageSubType, MessagePayload } from "./message.type";
+import { MyContext } from "../../types/MyContext";
 
 @Resolver()
 export class MessageResolver {
   // @ts-ignore
   @Subscription(type => MessageSubType, {
-    topics: "MESSAGES",
+    topics: ({ context }) => {
+      console.log("Message resolver @Subscription() view context");
+      console.log(Object.keys(context));
+      console.log(context);
+      //   console.log(Object.keys(context.connection));
+      //   console.log(Object.keys(context.connection.context));
+      //   console.log(context.connection.context);
+      //   console.log(args);
+      //   console.log(payload);
+      return "MESSAGES";
+    },
 
     filter: ({
       payload,
@@ -54,13 +66,18 @@ export class MessageResolver {
   // @ts-ignore
   @Mutation(type => Boolean)
   async addNewMessage(
+    @Ctx() context: MyContext,
     // @ts-ignore
     @PubSub("MESSAGES") publish: Publisher<NotificationPayload>,
     // @ts-ignore
     @Args(type => MessageInput) input: MessageInput
   ): Promise<boolean> {
     // Promise<boolean>
-
+    if (!context) {
+      console.log("THIS IS AN ERROR!");
+      console.log(context);
+      throw new Error("not authed");
+    }
     const receiver = await User.findOne({
       where: {
         id: "00a33f72-4a23-4753-a607-d98aaaed69f9"
