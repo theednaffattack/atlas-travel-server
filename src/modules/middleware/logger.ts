@@ -6,6 +6,9 @@ export const logger: MiddlewareFn<MyContext> = async (
   { args, ...theRest },
   next
 ) => {
+  console.log("view logging middleware settings".toUpperCase());
+  console.log(Object.keys(theRest));
+  console.log(theRest.context);
   let gqlQueryBody = theRest.context.req.body.query;
   captureArgsLogger.write({
     time: new Date(),

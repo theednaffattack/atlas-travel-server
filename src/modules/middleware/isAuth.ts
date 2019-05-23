@@ -53,11 +53,11 @@ export const isAuth: MiddlewareFn<MyContext> = async (
   // console.log(root);
   console.log(context);
 
-  // if (!context.userId) {
-  //   console.log("what is context INSIDE if block (!context.userId)?");
-  //   console.log(context);
-  //   // console.log(context.userInfo);
-  //   throw new Error("Not authenticated");
-  // }
+  if (!context.userId) {
+    console.log("what is context INSIDE if block (!context.userId)?");
+    console.log(context);
+    // console.log(context.userInfo);
+    throw new Error("Not authenticated");
+  }
   return next();
 };

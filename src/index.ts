@@ -45,18 +45,20 @@ const getContextFromHttpRequest = (req: any) => {
   // const { userId } = req.session;
   console.log("getContextFromHttpRequest RUNNING");
   // console.log(Object.keys(req));
+  const { userId } = req.session;
+  console.log("LET'S VIEW THE SESSION INFO");
   console.log(req.session);
-  console.log(req.session.cookie);
-  console.log(req.userId);
-  return { userId: req.session.userId };
+  console.log("IS USERID ATTACHED TO SESSION?");
+  console.log(userId);
+  return { userId, req };
 };
 
 const getContextFromSubscription = (connection: any) => {
   // const { userId } = connection.context;
-  const userId = connection.context.req.session.userId;
+  const { userId } = connection.context.req.session;
   console.log("getContextFromSubscription RUNNING");
   console.log(userId);
-  return { userId };
+  return { userId, req: connection.context.req };
 };
 
 const main = async () => {
@@ -122,8 +124,10 @@ const main = async () => {
       }
 
       console.log("CONNECTION NOT SENSED, LOOKING FOR REQ OBJECT");
+
       console.log(req.session);
       // console.log(connection && connection.context ? connection.context : null);
+      console.log("LET'S TRY CHECKING THE HTTP REQ OBJECT");
       console.log(getContextFromHttpRequest(req));
       return getContextFromHttpRequest(req);
 
