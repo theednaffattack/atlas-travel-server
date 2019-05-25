@@ -24,25 +24,22 @@ export class MessageResolver {
   // @ts-ignore
   @Subscription(type => MessageSubType, {
     topics: ({ context }) => {
-      console.log("Message resolver @Subscription() view context");
-      console.log(Object.keys(context));
-      console.log(context);
-      //   console.log(Object.keys(context.connection));
-      //   console.log(Object.keys(context.connection.context));
-      //   console.log(context.connection.context);
-      //   console.log(args);
-      //   console.log(payload);
+      if (!context.userId) {
+        throw new Error("not authed");
+      }
       return "MESSAGES";
     },
 
+    // @ts-ignore
     filter: ({
       payload,
       args
     }: ResolverFilterData<MessagePayload, MessageInput>) => {
-      console.log("INSIDE SUBSCRIPTIONS FILTER");
-      console.log(payload);
-      console.log(args);
+      //   console.log(payload);
+      //   console.log(args);
       //   return payload.recipeId === args.recipeId;
+      // I'll use the example return above to filter for the
+      // current selected message thread
       return true;
     }
     // filter: ({ payload, args }) => args.priorities.includes(payload.priority),
@@ -53,9 +50,9 @@ export class MessageResolver {
     @Args(type => MessageInput) input: MessageInput
   ): MessageSubType {
     // do some stuff
-    console.log("I'M TYING TO UPDATE THE SUBSCRIPTION");
+    // console.log("I'M TYING TO UPDATE THE SUBSCRIPTION");
 
-    console.log(messagePayload);
+    // console.log(messagePayload);
     // console.log(input);
     return {
       ...messagePayload,

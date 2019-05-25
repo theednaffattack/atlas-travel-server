@@ -32,6 +32,7 @@ import {
   CreateReservationResolver
 } from "../../modules/hotel/reservations/ExportedResolvers";
 import { GetReservationByHotelIDAndDateFilterResolver } from "../../modules/hotel/reservations/GetReservationByHotelIDAndDateFilterResolver";
+import { GetMyMessagesResolver } from "../../modules/messages/GetMyMessages";
 
 // const pubsub = new RedisPubSub();
 // const myRedisPubSub = getConfiguredRedisPubSub();
@@ -43,9 +44,6 @@ const pubsubOptions = {
     return Math.max(options.attempt * 100, 3000);
   }
 };
-
-console.log("pubsubOptions".toUpperCase());
-console.log(pubsubOptions);
 
 export const pubSub = new RedisPubSub({
   // ..., // I need to determine what the other options are
@@ -74,6 +72,7 @@ export const createSchema = () =>
       ForgotPasswordResolver,
       GetAllHotelResolver,
       GetAllReservationsResolver,
+      GetMyMessagesResolver,
       GetReservationByHotelIDAndDateFilterResolver,
       HotelAvgRatingResolver,
       HotelCountReviewsResolver,

@@ -45,15 +45,15 @@ export class LoginResolver {
       // return null;
     }
 
-    // console.log(JSON.stringify(ctx.req.session));
+    console.log("This is where I set the user to session");
+    console.log(JSON.stringify(ctx.req.session, null, 2));
 
     // all is well return the user we found
-    // ctx.req.session!.userId = user.id;
+    ctx.req.session!.userId = user.id;
     ctx.userId = user.id;
-    // ctx.req.session!.userId = user.id;
     console.log("ctx.userId inside login resolver".toUpperCase());
     console.log(ctx.userId);
-    // console.log(ctx.req.session!.userId);
+    console.log(ctx.req.session!.userId);
     // ctx.res.send(user);
     return user;
   }

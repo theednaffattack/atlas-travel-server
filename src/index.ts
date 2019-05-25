@@ -43,21 +43,18 @@ const sessionMiddleware = session({
 
 const getContextFromHttpRequest = (req: any) => {
   // const { userId } = req.session;
-  console.log("getContextFromHttpRequest RUNNING");
   // console.log(Object.keys(req));
   const { userId } = req.session;
-  console.log("LET'S VIEW THE SESSION INFO");
-  console.log(req.session);
-  console.log("IS USERID ATTACHED TO SESSION?");
-  console.log(userId);
+  // console.log("LET'S VIEW THE SESSION INFO");
+  // console.log(req.session);
+  // console.log("new Context object");
+  // console.log({ userId, req });
   return { userId, req };
 };
 
 const getContextFromSubscription = (connection: any) => {
   // const { userId } = connection.context;
   const { userId } = connection.context.req.session;
-  console.log("getContextFromSubscription RUNNING");
-  console.log(userId);
   return { userId, req: connection.context.req };
 };
 
@@ -79,11 +76,11 @@ const main = async () => {
     subscriptions: {
       path: "/subscriptions",
       onConnect: (_, webSocket: any) => {
-        console.log("Connected to websocket".toUpperCase());
         return new Promise(resolve =>
           sessionMiddleware(webSocket.upgradeReq, {} as any, () => {
-            console.log("webSocket.upgradeReq");
-            console.log(webSocket.upgradeReq.session);
+            if (!webSocket.upgradeReq.session.userId) {
+              throw new Error("Not authenticated");
+            }
             resolve({
               req: webSocket.upgradeReq
               // userId: webSocket.upgradeReq.session.userId
@@ -94,41 +91,15 @@ const main = async () => {
 
       onDisconnect: () => {
         // ...
-        console.log("subscriptions closing (disconnect)");
         // console.log(webSocket);
         // console.log(context);
       }
     },
     context: ({ req, connection }: any) => {
-      console.log(
-        "READ CONTEXT IN APOLLO SERVER CONFIG\nhey what's going on? there's no userId yet"
-      );
-      // if (connection) {
-      //   console.log("RETURNING THE FIRST OPTION");
-      //   console.log(Object.keys(connection.context));
-      //   return connection.context;
-      // } else {
-      //   console.log(req && req.session);
-      //   console.log(req ? Object.keys(req) : "no req");
-      //   console.log(connection ? Object.keys(connection) : "no connection");
-      //   console.log(connection);
-      //   console.log("RETURNING THE SECOND OPTION");
-      //   // console.log({ req, userInfo: req.session.userId });
-      //   return { req, res, connection };
-      // }
-
       if (connection) {
-        console.log("CONNECTION SENSED");
-        console.log(getContextFromSubscription(connection));
         return getContextFromSubscription(connection);
       }
 
-      console.log("CONNECTION NOT SENSED, LOOKING FOR REQ OBJECT");
-
-      console.log(req.session);
-      // console.log(connection && connection.context ? connection.context : null);
-      console.log("LET'S TRY CHECKING THE HTTP REQ OBJECT");
-      console.log(getContextFromHttpRequest(req));
       return getContextFromHttpRequest(req);
 
       // return { req, res, connection };
