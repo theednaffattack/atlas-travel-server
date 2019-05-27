@@ -75,9 +75,10 @@ export class MessageResolver {
       console.log(context);
       throw new Error("not authed");
     }
+
     const receiver = await User.findOne({
       where: {
-        id: "00a33f72-4a23-4753-a607-d98aaaed69f9"
+        id: context.userId
       }
     });
 
@@ -88,7 +89,7 @@ export class MessageResolver {
       createdAt: new Date(),
       updatedAt: new Date(),
       message: input.message,
-      sentBy: "00840864-fa70-4b19-968a-0421b77b2074", // (Jamey.Cassin@Eloise.org: Aisha Stanton) //SENDING User,
+      sentBy: input.sentBy, // (Jamey.Cassin@Eloise.org: Aisha Stanton) //SENDING User,
       user: receiver // (Reinger_Keaton@yahoo.com: Candelario Johnson) THE USER BEING SENT TO
     };
 

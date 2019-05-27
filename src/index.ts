@@ -18,6 +18,7 @@ import { stream } from "../src/config/winston";
 import { redis } from "./redis";
 import { redisSessionPrefix } from "./constants";
 import { createSchema } from "./global-utils/graphql/createSchema";
+import { AnyExtensionField } from "protobufjs";
 
 // import serveStatic = require("serve-static");
 
@@ -41,7 +42,7 @@ const sessionMiddleware = session({
   }
 });
 
-const getContextFromHttpRequest = (req: any) => {
+const getContextFromHttpRequest = (req: any, res: AnyExtensionField) => {
   // const { userId } = req.session;
   // console.log(Object.keys(req));
   const { userId } = req.session;
@@ -49,7 +50,7 @@ const getContextFromHttpRequest = (req: any) => {
   // console.log(req.session);
   // console.log("new Context object");
   // console.log({ userId, req });
-  return { userId, req };
+  return { userId, req, res };
 };
 
 const getContextFromSubscription = (connection: any) => {
@@ -95,12 +96,12 @@ const main = async () => {
         // console.log(context);
       }
     },
-    context: ({ req, connection }: any) => {
+    context: ({ req, res, connection }: any) => {
       if (connection) {
         return getContextFromSubscription(connection);
       }
 
-      return getContextFromHttpRequest(req);
+      return getContextFromHttpRequest(req, res);
 
       // return { req, res, connection };
     },

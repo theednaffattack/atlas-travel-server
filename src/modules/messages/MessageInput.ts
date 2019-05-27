@@ -6,6 +6,9 @@ import { Field, ObjectType, ArgsType, InputType } from "type-graphql";
 export class MessageInput {
   // @ts-ignore
   @Field(type => String)
+  sentBy: string;
+  // @ts-ignore
+  @Field(type => String)
   message: string;
 }
 

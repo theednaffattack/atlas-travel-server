@@ -25,6 +25,14 @@ export class GetMyMessagesResolver {
     const newMessages: Message[] = await Message.find({
       where: { userId: context.userId, sentBy: input.sentBy }
     });
+
+    const groupedMessages = await Message.createQueryBuilder("message")
+      //   .select('"sentBy"')
+      .where('"sentBy" = :sentBy', { sentBy: input.sentBy })
+      .groupBy('"sentBy"')
+      .addGroupBy("id")
+      .getMany();
+    console.log(groupedMessages);
     return newMessages;
   }
 }
